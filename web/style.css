@@ -1,0 +1,102 @@
+/* Dark and light mode container */
+html[data-bs-theme="light"],
+html[data-bs-theme="light"] body,
+html[data-bs-theme="light"] .page,
+html[data-bs-theme="light"] .page-wrapper,
+html[data-bs-theme="light"] .navbar {
+    background-color: #e2e8f0 !important;
+    color: #334155 !important;
+}
+
+html[data-bs-theme="dark"],
+html[data-bs-theme="dark"] body,
+html[data-bs-theme="dark"] .page,
+html[data-bs-theme="dark"] .page-wrapper,
+html[data-bs-theme="dark"] .navbar {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+/* Group title contrast */
+html[data-bs-theme="light"] .text-success,
+html[data-bs-theme="light"] .group-title,
+html[data-bs-theme="light"] .card-title {
+    color: #15803d !important; /* Strong, readable green */
+    font-weight: 600 !important;
+}
+
+html[data-bs-theme="dark"] .text-success,
+html[data-bs-theme="dark"] .group-title,
+html[data-bs-theme="dark"] .card-title {
+    color: #4ade80 !important; /* Bright green for dark mode */
+}
+
+/* Tiles in dark mode */
+html[data-bs-theme="dark"] .tile-container .card,
+html[data-bs-theme="dark"] .tile-container .card-link-pop {
+    background: #283a52 !important;
+    background-color: #283a52 !important;
+    border: 2px solid #4f6b8e !important;
+}
+
+html[data-bs-theme="dark"] .tile-container .card:hover,
+html[data-bs-theme="dark"] .tile-container .card-link-pop:hover {
+    background: #324763 !important;
+    background-color: #324763 !important;
+    border-color: #6384af !important;
+}
+
+/* Tiles in light mode */
+html[data-bs-theme="light"] .tile-container .card,
+html[data-bs-theme="light"] .tile-container .card-link-pop {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+}
+
+html[data-bs-theme="light"] .tile-container .card:hover,
+html[data-bs-theme="light"] .tile-container .card-link-pop:hover {
+    background-color: #ffffff !important;
+    border-color: #94a3b8 !important;
+}
+
+.card-link-pop {
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.card-link-pop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Tile drag and drop styles */
+.tile-container .card {
+    cursor: grab;
+}
+
+.tile-container .card:active {
+    cursor: grabbing;
+}
+
+.sortable-ghost {
+    opacity: 0.3 !important;
+    transform: scale(0.96);
+}
+
+.sortable-chosen {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Group drag and drop styles */
+.cursor-move {
+    cursor: move;
+}
+
+.sortable-ghost-group {
+    opacity: 0.25 !important;
+    border: 2px dashed var(--tblr-primary) !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+

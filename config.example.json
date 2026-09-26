@@ -1,0 +1,36 @@
+{
+    "title": "My Homelab",
+    "showUrls": false,
+    "groups": [
+        {
+            "id": "group-1",
+            "name": "Infrastructure",
+            "tiles": [
+                {
+                    "id": "tile-1",
+                    "title": "Proxmox",
+                    "url": "https://192.0.2.10:8006/",
+                    "icon": "proxmox"
+                },
+                {
+                    "id": "tile-2",
+                    "title": "Router",
+                    "url": "http://192.0.2.1/",
+                    "icon": "router"
+                }
+            ]
+        },
+        {
+            "id": "group-2",
+            "name": "Monitoring",
+            "tiles": [
+                {
+                    "id": "tile-3",
+                    "title": "Grafana",
+                    "url": "http://192.0.2.20:3000/",
+                    "icon": "grafana"
+                }
+            ]
+        }
+    ]
+}

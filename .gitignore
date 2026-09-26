@@ -1,0 +1,21 @@
+# Runtime data
+.env
+/data/
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# OS / editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Temporary files
+*.tmp
