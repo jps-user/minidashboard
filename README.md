@@ -2,6 +2,9 @@
 
 A deliberately simple, lightweight dashboard for self-hosted services and homelabs.
 
+![MiniDashboard preview](minidashboard-preview.png)
+
+
 MiniDashboard is designed around a few principles:
 
 - **No database**
