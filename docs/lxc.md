@@ -2,143 +2,239 @@
 
 MiniDashboard can run directly in a lightweight Debian LXC without Docker.
 
+This guide starts with a fresh Debian LXC and installs MiniDashboard as a systemd service.
+
 ## Requirements
 
-- Debian-based Linux container
+- Debian-based LXC
 - Python 3
+- Git
 - systemd
-- Network access to the systems you want to manage
+- Network access
+- TCP port 8080 available for the dashboard
 
-No database or additional application server is required.
+No database, Node.js installation, or Docker daemon is required.
 
 ## Installation
 
-Create a dedicated directory:
+The following example uses:
 
-mkdir -p /opt/minidashboard
-cd /opt/minidashboard
+- Application directory: `/opt/minidashboard`
+- Persistent data directory: `/var/lib/minidashboard`
+- Web interface: TCP port `8080`
 
-Copy the MiniDashboard application files into this directory.
+### 1. Install required packages
 
-Install the required Python packages:
+On a fresh Debian LXC, install Git and the Python environment:
 
-python3 -m pip install -r requirements.txt
+    apt update
+    apt install -y git python3 python3-venv
 
-If the distribution does not provide pip, install it first using the distribution's package manager.
+### 2. Download MiniDashboard
 
-Create the persistent data directory:
+Clone the public repository directly into the application directory:
 
-mkdir -p /var/lib/minidashboard
+    git clone https://github.com/jps-user/minidashboard.git /opt/minidashboard
+    cd /opt/minidashboard
 
-Start MiniDashboard for a first test:
+The complete MiniDashboard application, web interface, configuration examples and bundled icons are now available in `/opt/minidashboard`.
 
-cd /opt/minidashboard
-DATA_DIR=/var/lib/minidashboard python3 main.py
+### 3. Create the Python environment
 
-The web interface is available on:
+Create a dedicated Python virtual environment and install the required packages:
 
-http://YOUR-LXC-IP:8080
+    python3 -m venv /opt/minidashboard/.venv
+    /opt/minidashboard/.venv/bin/pip install --upgrade pip
+    /opt/minidashboard/.venv/bin/pip install -r /opt/minidashboard/requirements.txt
 
-Stop the test process with Ctrl+C.
+MiniDashboard runs from this virtual environment so its Python packages remain separate from the Debian system Python installation.
+
+### 4. Create the persistent data directory
+
+Create the directory used for the dashboard configuration and downloaded icons:
+
+    mkdir -p /var/lib/minidashboard
+
+The application files remain in `/opt/minidashboard`.
+
+Persistent runtime data is kept separately in `/var/lib/minidashboard`.
+
+### 5. Test the application manually
+
+Before creating the systemd service, start MiniDashboard manually:
+
+    cd /opt/minidashboard
+    DATA_DIR=/var/lib/minidashboard /opt/minidashboard/.venv/bin/python main.py
+
+MiniDashboard listens on TCP port `8080`.
+
+Find the LXC IP address with:
+
+    hostname -I
+
+Then open the dashboard in a browser:
+
+    http://YOUR-LXC-IP:8080
+
+Verify that the dashboard loads correctly.
+
+Stop the test process with `Ctrl+C`.
 
 ## systemd service
 
-For normal operation, run MiniDashboard as a systemd service.
+After the manual test has completed successfully, create a systemd service so MiniDashboard starts automatically with the LXC.
 
-Create:
+Create the service file:
 
-/etc/systemd/system/minidashboard.service
+    nano /etc/systemd/system/minidashboard.service
 
-with the following content:
+Enter the following:
 
-[Unit]
-Description=MiniDashboard
-After=network-online.target
-Wants=network-online.target
+    [Unit]
+    Description=MiniDashboard
+    After=network-online.target
+    Wants=network-online.target
 
-[Service]
-Type=simple
-WorkingDirectory=/opt/minidashboard
-Environment=DATA_DIR=/var/lib/minidashboard
-ExecStart=/usr/bin/python3 /opt/minidashboard/main.py
-Restart=always
-RestartSec=3
+    [Service]
+    Type=simple
+    WorkingDirectory=/opt/minidashboard
+    Environment=DATA_DIR=/var/lib/minidashboard
+    ExecStart=/opt/minidashboard/.venv/bin/python /opt/minidashboard/main.py
+    Restart=always
+    RestartSec=3
 
-[Install]
-WantedBy=multi-user.target
+    [Install]
+    WantedBy=multi-user.target
 
-Reload systemd:
+Save the file and reload systemd:
 
-systemctl daemon-reload
+    systemctl daemon-reload
 
-Enable and start the service:
+Enable and start MiniDashboard:
 
-systemctl enable --now minidashboard
+    systemctl enable --now minidashboard
 
 Check the service:
 
-systemctl status minidashboard
+    systemctl status minidashboard
 
-The web interface is then available on:
+A successful installation should show:
 
-http://YOUR-LXC-IP:8080
+    Active: active (running)
+
+The dashboard is now available at:
+
+    http://YOUR-LXC-IP:8080
 
 ## Persistent data
 
-The application itself is stored in:
+The application is installed in:
 
-/opt/minidashboard
+    /opt/minidashboard
 
-Persistent runtime data is stored separately in:
+The Python virtual environment is:
 
-/var/lib/minidashboard
+    /opt/minidashboard/.venv
 
-This includes:
+Persistent MiniDashboard data is stored in:
 
-/var/lib/minidashboard/config.json
-/var/lib/minidashboard/icons/
-/var/lib/minidashboard/icon_variants.json
+    /var/lib/minidashboard
 
-Keeping the data directory separate allows the application files to be replaced during updates without overwriting the dashboard configuration or downloaded icons.
+Depending on usage, this directory contains:
+
+    /var/lib/minidashboard/config.json
+    /var/lib/minidashboard/icons/
+    /var/lib/minidashboard/icon_variants.json
+
+Keeping runtime data separate from the application directory means that updating the application does not replace the dashboard configuration or downloaded icons.
 
 ## Updating
 
-Stop MiniDashboard:
+MiniDashboard can be updated directly from the GitHub repository.
 
-systemctl stop minidashboard
+Stop the service:
 
-Replace the application files in:
+    systemctl stop minidashboard
 
-/opt/minidashboard
+Change to the application directory:
 
-The persistent data in:
+    cd /opt/minidashboard
 
-/var/lib/minidashboard
+Download the latest version:
 
-should not be removed.
+    git pull
+
+Update the Python dependencies:
+
+    /opt/minidashboard/.venv/bin/pip install -r /opt/minidashboard/requirements.txt
 
 Start MiniDashboard again:
 
-systemctl start minidashboard
+    systemctl start minidashboard
 
-Check the service:
+Verify the service:
 
-systemctl status minidashboard
+    systemctl status minidashboard
+
+The persistent data in `/var/lib/minidashboard` remains unchanged.
 
 ## Logs
 
-View the service log with:
+Show the MiniDashboard service log:
 
-journalctl -u minidashboard
+    journalctl -u minidashboard
 
-Follow the log:
+Follow the log in real time:
 
-journalctl -u minidashboard -f
+    journalctl -u minidashboard -f
+
+Show the last 100 log entries without opening the pager:
+
+    journalctl -u minidashboard -n 100 --no-pager
+
+## Troubleshooting
+
+Check whether MiniDashboard is listening on port 8080:
+
+    ss -ltnp | grep 8080
+
+Check the systemd service:
+
+    systemctl status minidashboard
+
+If the service failed to start, check the log:
+
+    journalctl -u minidashboard -n 100 --no-pager
+
+After changing the systemd service file, always reload systemd:
+
+    systemctl daemon-reload
+
+Then restart MiniDashboard:
+
+    systemctl restart minidashboard
 
 ## Network access
 
-MiniDashboard listens on TCP port 8080.
+MiniDashboard listens on TCP port `8080`.
 
-If the LXC uses a host firewall or an external firewall, allow access to this port from the networks that should be able to access the dashboard.
+If a firewall is used on the LXC, Proxmox host, or network, allow TCP port `8080` from the networks that should access the dashboard.
 
-MiniDashboard does not provide authentication or authorization. It should therefore normally be used only on a trusted network or behind an appropriate authentication layer.
+MiniDashboard does not provide authentication or authorization. It is intended for use on a trusted network or behind an appropriate authentication and access-control layer.
+
+## File layout
+
+After installation, the relevant directories are:
+
+    /opt/minidashboard
+    ├── main.py
+    ├── requirements.txt
+    ├── web/
+    └── .venv/
+
+    /var/lib/minidashboard
+    ├── config.json
+    ├── icon_variants.json
+    └── icons/
+
+The application and its persistent data are deliberately kept separate.
